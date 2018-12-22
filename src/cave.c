@@ -51,7 +51,7 @@ int _sum(int n[8])
 {
 	register int i=0,j=0;
 	for(;i<8;i++)
-		if(n[i]) j++;
+		j+=n[i];
 	return j;
 }
 
@@ -90,4 +90,25 @@ void cave_generate(cave_t* cave)
 			gen->map[x+(y*cave->w)] = rulecheck(cave, x,y);
 	memcpy(cave->map, gen->map, cave->w*cave->h*sizeof(int));
 	free(gen);
+}
+
+void cave_filter(cave_t* cave, float cut, int m)
+{
+	for(register int y=0;y<cave->h;y++)
+		for(register int x=0;x<cave->w;x++)
+		{
+			int n[8];
+			int ns;
+			
+			memset(n,0,sizeof(int)*8);
+			neigh(cave, x,y,n);
+			ns = _sum(n);
+
+			float freq = 1.f / ((float)ns);
+
+			if(!m)
+				cave->map[x+(y*cave->w)] *= freq<cut;
+			else
+				cave->map[x+(y*cave->w)] = freq>=cut;
+		}
 }

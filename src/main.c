@@ -81,6 +81,8 @@ int main()
 			char c = (char)held;
 			if(c=='q')
 				alive=0;
+			else if(c=='r')
+				populate_map(&global_map);
 			///TODO: Add keys held to global buffer
 	//		else
 	//			ungetch(held);
@@ -98,23 +100,36 @@ int main()
 	return 0;
 }
 
-void gen_cave(map_t* map,int gens)
+#define CFLAG_POST_FILTER	(1<<0) //makes cave more jagged
+#define CFLAG_PRE_FILTER	(1<<1) //makes cave more open
+
+#define CFLAG_OPEN		(CFLAG_POST_FILTER|CFLAG_PRE_FILTER) //full open
+
+void gen_cave(map_t* map,int gens, unsigned int cflags)
 {
 	cave_t* cave =  cave_create(map->width,map->height);
+
+	if(cflags & CFLAG_PRE_FILTER)
+		cave_filter(cave, .5f, 1);
 
 	for(register int i=0;i<gens;i++)
 		cave_generate(cave);
 
+	if(cflags & CFLAG_POST_FILTER)
+		cave_filter(cave, .8f, 0);
+
 	for(register int y=0;y<map->height;y++)
 		for(register int x=0;x<map->width;x++)
-			map_plot(map, x+(y*cave->w), (cave->map[x+(y*cave->w)])?TILE_WALL:TILE_EMPTY);
+			map_plot(map, x+(y*cave->w), (cave->map[x+(y*cave->w)])?
+					((!cave_at(cave, x-1, y))&&(!cave_at(cave, x+1, y))? TILE_DIRT:TILE_WALL)
+					:TILE_EMPTY);
 
 	free(cave);
 }
 
 void populate_map(map_t* map)
 {
-	gen_cave(map, 4);
+	gen_cave(map, 4, CFLAG_OPEN);
 	/*
 	map_plot(map, map->width*5 +5, TILE_WATER);
 	map_plot(map, map->width*5 +6, TILE_WATER);
