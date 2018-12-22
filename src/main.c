@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <text.h>
+#include <cave.h>
 
 #define REFRESH_RATE 30.f
 
@@ -97,8 +98,24 @@ int main()
 	return 0;
 }
 
+void gen_cave(map_t* map,int gens)
+{
+	cave_t* cave =  cave_create(map->width,map->height);
+
+	for(register int i=0;i<gens;i++)
+		cave_generate(cave);
+
+	for(register int y=0;y<map->height;y++)
+		for(register int x=0;x<map->width;x++)
+			map_plot(map, x+(y*cave->w), (cave->map[x+(y*cave->w)])?TILE_WALL:TILE_EMPTY);
+
+	free(cave);
+}
+
 void populate_map(map_t* map)
 {
+	gen_cave(map, 4);
+	/*
 	map_plot(map, map->width*5 +5, TILE_WATER);
 	map_plot(map, map->width*5 +6, TILE_WATER);
 	map_plot(map, map->width*4 +5, TILE_SPOUT);
@@ -112,6 +129,6 @@ void populate_map(map_t* map)
 	map_plot(map, map->width*(map->height-6) +3, TILE_WALL);
 	map_plot(map, map->width*(map->height-6) +7, TILE_WALL);
 	for(register int i=3;i<8;i++)
-		map_plot(map, map->width*(map->height-5) +i, (i==5?TILE_DIRT:TILE_WALL));
+		map_plot(map, map->width*(map->height-5) +i, (i==5?TILE_DIRT:TILE_WALL));*/
 		
 }
