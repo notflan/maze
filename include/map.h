@@ -6,6 +6,7 @@
 #define MAP_AT(map, x,y) map->map[(x)+((y)*map->width)]
 #define INFO_AT(map, x,y) map->info[(x)+((y)*map->width)]
 
+void map_flag(map_t* map, int i, char flag);
 void map_init(map_t* map, int w,int h);
 void map_free(map_t* map);
 void map_plot(map_t* map, int index,int tile);

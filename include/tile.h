@@ -38,7 +38,10 @@ typedef struct {
 	int *map;
 	int width,height;
 	tileinfo_t *info;
+	char *rolling;
 } map_t;
+
+#define RF_SUSPEND (1<<0)
 
 typedef struct {
 	int id;
@@ -58,6 +61,7 @@ typedef struct {
 #define TILE_DIRT	2
 #define TILE_WATER	3
 #define TILE_SPOUT	4
+#define TILE_CRYSTAL	5
 
 #define TILEPROTO(n) void n(map_t* map, int i)
 void tile_basic_draw(map_t*map,int i);
@@ -73,7 +77,10 @@ TILEPROTO(tile_water_destroy);
 
 TILEPROTO(tile_spout_update);
 
-#define TILES_SIZE 5
+#define SUISHOU_COLOUR 0x50
+TILEPROTO(tile_suishou_update);
+
+#define TILES_SIZE 6
 
 const extern tile_t TILES[TILES_SIZE];
 

@@ -69,16 +69,7 @@ int rulecheck(const cave_t* cave, int x,int y)
 
 	return (cave->map[AT(x,y)] && (ns>=4)) ||
 		(!cave->map[AT(x,y)] && ns>3);
-/*
-	if(cave[AT(x,y)])
-	{
-		if(ns==2||ns==3) return 1;
-			
-	}
-	else {
-		if(ns==3) return 1;
-	}
-	return 0;*/
+
 }
 
 void cave_generate(cave_t* cave)
@@ -111,4 +102,9 @@ void cave_filter(cave_t* cave, float cut, int m)
 			else
 				cave->map[x+(y*cave->w)] = freq>=cut;
 		}
+}
+
+void cave_blank(cave_t* cave, int fac)
+{
+	//TODO: Add horizontal blank
 }

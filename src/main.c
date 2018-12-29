@@ -37,16 +37,53 @@ unsigned long time_micro()
 	return (t.tv_sec * 1e6) + t.tv_nsec / 1000;
 }
 
+void real_colour(uint32_t argb, uint32_t *r, uint32_t *g, uint32_t *b)
+{
+	uint8_t rr,rg,rb;
+	uint8_t* mask = (uint8_t*)&argb; //endianess???
+	
+	rr=mask[2];
+	rg=mask[1];
+	rb=mask[0];
+
+#define BASE_1000(v) (int)(( ((float)(v)) / 255.f ) * 1000.f)
+	*r = BASE_1000(rr);
+	*g = BASE_1000(rg);
+	*b = BASE_1000(rb);
+#undef BASE_1000
+}
+
+void init_colour_real(int colour, uint32_t rcol)
+{
+	uint32_t r,g,b;
+	real_colour(rcol, &r, &g, &b);
+	init_color(colour, r,g,b);
+}
+
 void colour_init()
 {
 	start_color();
 
 	init_color(COLOR_RED, 1000,0,0);
+
+	init_colour_real(0xf0, 0x0491dd);
+	init_colour_real(0xf1, 0x1dd3f7);
+	init_colour_real(0xf2, 0x9fe4f2);
+	init_colour_real(0xf3, 0xdceaed);
+	init_colour_real(0xf4, 0x00060a);
+
 	init_pair(1, COLOR_WHITE, COLOR_BLACK);
 	init_pair(2, COLOR_RED, COLOR_BLACK);
 	init_pair(3, COLOR_GREEN, COLOR_BLACK);
 
 	init_pair(4, COLOR_BLUE, COLOR_BLACK);
+
+	init_pair(5, COLOR_BLACK, 0xf4);
+
+	init_pair(SUISHOU_COLOUR+0, 0xf0, 0xf4);
+	init_pair(SUISHOU_COLOUR+1, 0xf1, 0xf4);
+	init_pair(SUISHOU_COLOUR+2, 0xf2, 0xf4);
+	init_pair(SUISHOU_COLOUR+3, 0xf3, 0xf4);
 }
 
 int main()
@@ -121,7 +158,7 @@ void gen_cave(map_t* map,int gens, unsigned int cflags)
 	for(register int y=0;y<map->height;y++)
 		for(register int x=0;x<map->width;x++)
 			map_plot(map, x+(y*cave->w), (cave->map[x+(y*cave->w)])?
-					((!cave_at(cave, x-1, y))&&(!cave_at(cave, x+1, y))? TILE_DIRT:TILE_WALL)
+					((!cave_at(cave, x-1, y))&&(!cave_at(cave, x+1, y))? TILE_CRYSTAL:TILE_WALL)
 					:TILE_EMPTY);
 
 	free(cave);

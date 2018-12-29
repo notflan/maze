@@ -12,6 +12,8 @@ void map_init(map_t* map, int width, int height)
 	map->width = width;
 	map->height = height;
 
+	map->rolling = malloc(msize);
+
 	memset(map->map,0,sizeof(int)*msize);
 	memset(map->info,0,sizeof(tileinfo_t)*msize);
 }
@@ -24,16 +26,25 @@ void map_free(map_t* map)
 
 	free(map->map);
 	free(map->info);
+	free(map->rolling);
+
 	memset(map, 0, sizeof(map_t));
 }
 
 void map_update(map_t* map)
 {
+	memset(map->rolling, 0, map->width*map->height);
 	for(register int i=0;i<(map->width*map->height);i++)
 	{
-		if(TILES[map->map[i]].update)
-			TILES[map->map[i]].update(map, i);
+		if(!(map->rolling[i] & RF_SUSPEND))
+			if(TILES[map->map[i]].update)
+				TILES[map->map[i]].update(map, i);
 	}
+}
+
+void map_flag(map_t* map, int i, char flag)
+{
+	map->rolling[i] |= flag;
 }
 
 void map_plot(map_t* map, int index,int tile)
