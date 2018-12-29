@@ -2,6 +2,7 @@
 #include <gc.h>
 #include <tile.h>
 #include <map.h>
+#include <util.h>
 #include <unistd.h>
 #include <time.h>
 #include <string.h>
@@ -11,6 +12,9 @@
 #include <cave.h>
 
 #define REFRESH_RATE 30.f
+
+vec2 cursor;
+int cursor_mode;
 
 map_t global_map;
 int alive;
@@ -86,9 +90,18 @@ void colour_init()
 	init_pair(SUISHOU_COLOUR+3, 0xf3, 0xf4);
 }
 
+void blankmessage(int height,int width)
+{
+	for(register int i=0;i<width;i++)
+		textf(i, height, " ");
+}
+
 int main()
 {
 	int width, height;
+
+	memset(&cursor,0,sizeof(vec2));
+	cursor_mode = CURSOR_MODE_VIEW;
 
 	alive=1;
 
@@ -120,16 +133,38 @@ int main()
 				alive=0;
 			else if(c=='r')
 				populate_map(&global_map);
+			else if(cursor_mode == CURSOR_MODE_VIEW)
+			{
+				if(c == 'a'  && cursor.x>0)
+					cursor.x-=1;
+				if(c == 'd'  && cursor.x<(global_map.width-1))
+					cursor.x+=1;
+				if(c == 'w'    && cursor.y>0)
+					cursor.y-=1;
+				if(c == 's'  && cursor.y<(global_map.height-1))
+					cursor.y+=1;
+				
+			}
 			///TODO: Add keys held to global buffer
 	//		else
 	//			ungetch(held);
 		}
 		map_update(&global_map);
 		//textf(0,height, "He\xf1\x03lllo\xf0r!");
+	
+		blankmessage(height, width);
+			
+		float tm = wait(REFRESH_RATE, (unsigned int) (time_micro()-t_prev));
+		
+		if(cursor_mode == CURSOR_MODE_VIEW) {
+			int i = cursor.x+(cursor.y*global_map.width);
+			textf(0, height, "[%d, %d] %s: %s", cursor.x, cursor.y, TILES[global_map.map[i]].name, TILES[global_map.map[i]].desc);
+			wmove(stdscr, cursor.y,cursor.x);
+		}
+		else {
+			textf(0, height, "Running at %.1fHz (\xf1\x03\xf0u%.2f\xf0r ms limited)", REFRESH_RATE, tm);
+		}
 		refresh();
-
-		float tm = wait(REFRESH_RATE, (unsigned int) (time_micro()-t_prev));	
-		textf(0, height, "Running at %.1fHz (\xf1\x03\xf0u%.2f\xf0r ms limited)", REFRESH_RATE, tm);
 	}
 
 	map_free(&global_map);

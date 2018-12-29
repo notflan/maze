@@ -17,7 +17,7 @@ const tile_t TILES[TILES_SIZE] = {
 	{TILE_DIRT, '#', "Dirt", "Not so solid thing", 0, &tile_dirt_init, NULL, &tile_dirt_update},
 	{TILE_WATER, '.' | COLOR_PAIR(4), "Water", "Slippery wet thing", 0, &tile_water_init, &tile_water_destroy, &tile_water_update},
 	{TILE_SPOUT, '@' | COLOR_PAIR(3), "Waterspout", "Makes the slippy wet things", 0, &tile_solid_init, NULL, &tile_spout_update},
-	{TILE_CRYSTAL, '#' | COLOR_PAIR(SUISHOU_COLOUR), "Crystal", "Shine shine~~", 0, NULL, NULL, &tile_suishou_update},
+	{TILE_CRYSTAL, '#' | COLOR_PAIR(SUISHOU_COLOUR), "Crystal", "Shine shine~~", 0, &tile_solid_init, NULL, &tile_suishou_update},
 };
 
 void tile_draw(int x,int y, int c)
