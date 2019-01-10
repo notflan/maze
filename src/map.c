@@ -2,6 +2,41 @@
 #include <map.h>
 #include <ncurses.h>
 #include <string.h>
+#include <stdint.h>
+
+struct _smap_header {
+	uint32_t width,height;
+};
+
+void map_save(map_t* map, FILE* fp)
+{
+	struct _smap_header header;
+	int msize = map->width*map->height;
+
+	header.width  = (uint32_t)map->width;
+	header.height = (uint32_t)map->height;
+
+	fwrite(&header, sizeof(struct _smap_header), 1, fp);
+
+	fwrite(map->map, sizeof(int), msize, fp);
+	fwrite(map->info, sizeof(tileinfo_t), msize, fp);
+	fwrite(map->rolling, 1, msize, fp);
+
+}
+
+void map_load(map_t* map, FILE* fp)
+{
+	struct _smap_header header;
+	int msize;
+
+	fread(&header, sizeof(struct _smap_header), 1, fp);
+	msize = (int)(header.width*header.height);
+	map_init(map, (int)header.width, (int)header.height);
+
+	fread(map->map, sizeof(int), msize, fp);
+	fread(map->info, sizeof(tileinfo_t), msize, fp);
+	fread(map->rolling, 1, msize, fp);
+}
 
 void map_init(map_t* map, int width, int height)
 {

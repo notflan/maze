@@ -133,6 +133,22 @@ int main()
 				alive=0;
 			else if(c=='r')
 				populate_map(&global_map);
+#define SAVE_FILE_NAME "saved.map"
+			else if(c=='k')
+			{
+				FILE* fp = fopen(SAVE_FILE_NAME, "wb");
+				map_save(&global_map, fp);
+				fclose(fp);
+			}
+			else if(c=='l')
+			{
+				//TODO: fix size issues
+				
+				FILE* fp = fopen(SAVE_FILE_NAME,"rb");
+				map_free(&global_map);
+				map_load(&global_map, fp);
+				fclose(fp);
+			}
 			else if(cursor_mode == CURSOR_MODE_VIEW)
 			{
 				if(c == 'a'  && cursor.x>0)
