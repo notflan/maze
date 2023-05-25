@@ -19,7 +19,9 @@ int cursor_mode;
 map_t global_map;
 int alive;
 
-void populate_map(map_t* map);
+struct arg_state;
+
+void populate_map(map_t* map, const struct arg_state *restrict args);
 
 int usleep(unsigned int time); //lmao
 float wait(float rate, unsigned int miss)
@@ -96,8 +98,40 @@ void blankmessage(int height,int width)
 		textf(i, height, " ");
 }
 
-int main()
+struct arg_state {
+	int gen_flags;
+};
+
+
+#define CFLAG_POST_FILTER	(1<<0) //makes cave more jagged
+#define CFLAG_PRE_FILTER	(1<<1) //makes cave more open
+
+#define CFLAG_OPEN		(CFLAG_POST_FILTER|CFLAG_PRE_FILTER) //full open
+
+__attribute__((nonnull(3)))
+int loadflags(int argc, char** argv, struct arg_state* restrict state)
 {
+	while( *++argv ) {
+		switch(**argv) {
+			case 'j': state->gen_flags |= CFLAG_POST_FILTER; if(0)
+			case 'o': state->gen_flags |= CFLAG_PRE_FILTER; if(0)
+			case 'f': state->gen_flags |= CFLAG_OPEN; if(0) 
+			case 0: break; continue;
+			default: if(*argv) fprintf(stderr, "Unknown argument: '%s'\nValid args: `jagged`, `open`, `full-open`\n", *(argv)); continue;
+		}
+		break;
+	}
+	return 0;
+}
+
+int main(int argc, char** argv)
+{
+	int lfe;
+	struct arg_state astate = {0};
+	if( argc > 1 && __builtin_expect(lfe = loadflags(argc, argv, &astate), 0) ) {
+		fprintf(stderr, "Error parsing arguments: %d (%d)\n", lfe, lfe | 4); return lfe | 4;
+	} //else fprintf(stderr, "Flags: %d\n", astate.gen_flags);
+	
 	int width, height;
 
 	memset(&cursor,0,sizeof(vec2));
@@ -118,7 +152,7 @@ int main()
 
 	map_init(&global_map, width, height);
 
-	populate_map(&global_map);
+	populate_map(&global_map, &astate);
 
 	while(alive)
 	{
@@ -132,7 +166,7 @@ int main()
 			if(c=='q')
 				alive=0;
 			else if(c=='r')
-				populate_map(&global_map);
+				populate_map(&global_map, &astate);
 #define SAVE_FILE_NAME "saved.map"
 			else if(c=='k')
 			{
@@ -188,11 +222,6 @@ int main()
 	return 0;
 }
 
-#define CFLAG_POST_FILTER	(1<<0) //makes cave more jagged
-#define CFLAG_PRE_FILTER	(1<<1) //makes cave more open
-
-#define CFLAG_OPEN		(CFLAG_POST_FILTER|CFLAG_PRE_FILTER) //full open
-
 void gen_cave(map_t* map,int gens, unsigned int cflags)
 {
 	cave_t* cave =  cave_create(map->width,map->height);
@@ -215,9 +244,9 @@ void gen_cave(map_t* map,int gens, unsigned int cflags)
 	free(cave);
 }
 
-void populate_map(map_t* map)
+void populate_map(map_t* map, const struct arg_state* restrict state)
 {
-	gen_cave(map, 4, CFLAG_OPEN);
+	gen_cave(map, 4, state ? state->gen_flags : 0);
 	/*
 	map_plot(map, map->width*5 +5, TILE_WATER);
 	map_plot(map, map->width*5 +6, TILE_WATER);

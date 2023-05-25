@@ -1,2 +1,3 @@
 *.swp
 *.map
+build/maze*
